@@ -4,20 +4,20 @@
 This project is for participating the annual data competition, [KDD Cup 2018 of fresh air](https://biendata.com/competition/kdd_2018/).  
 Here, the solution of London air quality prediction is provided. 
 
-**Goal:**  
+### Goal  
 Given air quality and grid weather data, predict the air quality data of next 48 hours in London.
 
 ## Data
 Data is all provided on official site. [[link](https://biendata.com/competition/kdd_2018/data/)]
-- Air Quality
+### Air Quality
   - Stations: stations ID, latitude, longitude, site type, site name 
   - Data Type: PM2.5, PM10, NO2
   - 13 stations to be predicted, and other 11 stations for reference
-- Grid Weather
+### Grid Weather
   - Stations: station ID, latitude, longitude
   - Data Type: temperature, pressure, humidity, wind direction, wind speed, weather description
   - 861 grids in total
-- Historical vs Live
+### Historical vs Live
   - Historical data can be directly downloaded on official website, which includes dates on 2017/01/01-2018/03/30.
   - Live data can retrieved by official API. [[Tutorial](https://biendata.com/forum/view_post_category/9)]
 
