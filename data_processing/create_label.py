@@ -29,14 +29,14 @@ def create_label(df, target, offset=1):
     return: df: DataFrame, the input dataframe with target labels
     """
     # pre-processing for subsequent procedure
-    df.sort_values(by = 'utc_time', inplace = True)
+    df.sort_values(by ='utc_time', inplace = True)
     df['utc_time_delta'] = df.utc_time.shift(-1) - df.utc_time
     df['utc_time_delta'] = df.utc_time_delta.map(lambda timedelta: timedelta.seconds // 3600)  # convert time_delta into hours
     # df['utc_time_delta'] = df.utc_time_delta.map(lambda timedelta: timedelta.hour)
 
     labelName = '{}_label'.format(target)
     df[labelName] = [df[target].tolist()[i + offset] if delta == 1 else np.nan for i, delta in enumerate(df.utc_time_delta.tolist())]
-    df = df.dropna(subset=[labelName]).drop(['utc_time_delta'], axis=1)
+    # df = df.dropna(subset=[labelName]).drop(['utc_time_delta'], axis=1)
     return df
 
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     PM25_hist_filepath = '../input/london/london_PM25_hist_data_w_label.csv'
     if not os.path.isfile(PM25_hist_filepath):
-        london_PM25_data = london_aq_hist_data.groupby('station_id').apply(create_label, target='PM2.5')
+        london_PM25_data = london_aq_hist_data.groupby('station_id').apply(create_label, target='PM2.5').dropna(subset=['PM2.5_label']).drop(['utc_time_delta'], axis=1)
         london_PM25_data.to_csv(PM25_hist_filepath, index=False)
         print('London PM2.5 hist label data created and saved.')
         del london_PM25_data
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     PM10_hist_filepath = '../input/london/london_PM10_hist_data_w_label.csv'
     if not os.path.isfile(PM10_hist_filepath):
-        london_PM10_data = london_aq_hist_data.groupby('station_id').apply(create_label, target='PM10')
+        london_PM10_data = london_aq_hist_data.groupby('station_id').apply(create_label, target='PM10').dropna(subset=['PM10_label']).drop(['utc_time_delta'], axis=1)
         london_PM10_data.to_csv(PM10_hist_filepath, index=False)
         print('London PM10 hist label data created and saved.')
         del london_PM10_data
@@ -77,13 +77,13 @@ if __name__ == "__main__":
     london_aq_live_data['utc_time'] = pd.to_datetime(london_aq_live_data['utc_time'])
 
     PM25_live_filepath = '../input/london/london_PM25_live_data_w_label.csv'
-    london_PM25_live_data = london_aq_live_data.groupby('station_id').apply(create_label, target='PM2.5')
+    london_PM25_live_data = london_aq_live_data.groupby('station_id').apply(create_label, target='PM2.5').dropna(subset=['PM2.5_label']).drop(['utc_time_delta'], axis=1)
     london_PM25_live_data.to_csv(PM25_live_filepath, index=False)
     print('London PM2.5 live label data created and saved.')
     del london_PM25_live_data
 
     PM10_live_filepath = '../input/london/london_PM10_live_data_w_label.csv'
-    london_PM10_live_data = london_aq_live_data.groupby('station_id').apply(create_label, target='PM10')   
+    london_PM10_live_data = london_aq_live_data.groupby('station_id').apply(create_label, target='PM10').dropna(subset=['PM10_label']).drop(['utc_time_delta'], axis=1)
     london_PM10_live_data.to_csv(PM10_live_filepath, index=False)
     print('London PM10 live label data created and saved.')
     del london_PM10_live_data
