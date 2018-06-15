@@ -59,7 +59,8 @@ if __name__ == '__main__':
         # Read official historical data from file
         hist_data = pd.read_csv('../raw_data/London_historical_aqi_forecast_stations_20180331.csv', index_col=0)
         hist_data.columns = ['utc_time', 'station_id', 'PM2.5', 'PM10', 'NO2']
-        
+        hist_data.fillna(0).drop_duplicates(inplace=True)
+
         # Merge latitude and longitude data
         aq_stations = pd.read_csv('../raw_data/London_AirQuality_Stations.csv', index_col=0)
         hist_data = hist_data.join(aq_stations[['Latitude', 'Longitude']], on='station_id')
@@ -77,6 +78,7 @@ if __name__ == '__main__':
     live_aq_data = live_aq_data.drop(['id', 'CO_Concentration', 'O3_Concentration', 'SO2_Concentration'], axis=1)
     live_aq_data.columns = ['station_id', 'utc_time', 'PM2.5', 'PM10', 'NO2']
     live_aq_data = live_aq_data.reindex(columns=['utc_time', 'station_id', 'PM2.5', 'PM10', 'NO2'])
+    live_aq_data.fillna(0).drop_duplicates(inplace=True)
 
     # Merge latitude and longitude data
     aq_stations = pd.read_csv('../raw_data/London_AirQuality_Stations.csv', index_col=0)
@@ -99,6 +101,7 @@ if __name__ == '__main__':
     live_grid_data = read_multiple_csv('../raw_data/london/grid')
     live_grid_data = live_grid_data.drop(['id', 'weather'], axis=1)
     live_grid_data.columns = ['station_id', 'utc_time', 'temperature', 'pressure', 'humidity', 'wind_direction', 'wind_speed']
+    live_grid_data.fillna(0).drop_duplicates(inplace=True)
 
     # Add longitude data and latitude data to live meo data
     grid_stations_data = pd.read_csv('../raw_data/London_grid_weather_station.csv', index_col=0)
