@@ -28,36 +28,28 @@ import itertools
 def week_of_month(date):
     """ 
     Returns the week of the month given the specified date.
-    
+    Adjust the date with an offset, the weekday of the first date of that month.
+
     params: date: datetime64[ns]
     return: int
     """
-    
-    first_day = date.replace(day=1)  # the first day of the month which the given date is on
-    dom = date.day  # Between 1 and the number of days in the given month of the given year, from 1 to 31 inclusive.
-    adjusted_dom = dom + first_day.weekday()  # Return the day of the week as an integer, where Monday is 0 and Sunday is 6
-    return ceil(adjusted_dom/7)
-    
-    # return ceil((date.day+date.weekday())/7)
+    offset = date.replace(day=1).weekday()
+    return ceil((date.day + offset)/7)
 
 # ===========================================
 # Create relative time columns of London data
 # ===========================================
 
 # Initialize default directories
-folders = [('train', 'PM25'), ('train', 'PM10')]
+folders = [(t, air_quality) for t in ('train', 'test') for air_quality in ('PM2.5', 'PM10')]
 for f in folders:
     path = '../feature/london/{}/{}'.format(f[0], f[1])
     if not os.path.isdir(path):
         os.makedirs(path)
 
-path = '../feature/london/test'
-if not os.path.isdir(path):
-    os.makedirs(path)
-        
-# ==================================
-# Process London PM2.5 relative time
-# ==================================
+# ======================================
+# Generate London PM2.5 datetime features
+# ======================================
 PM25_hist_data = pd.read_csv('../input/london/london_PM25_hist_data_w_label.csv')
 PM25_live_data = pd.read_csv('../input/london/london_PM25_live_data_w_label.csv')
 PM25_data = pd.concat([PM25_hist_data, PM25_live_data])
@@ -77,13 +69,13 @@ cols = ['station_id', 'utc_time', 'PM2.5_label', 'month_of_year',
 
 PM25_relative_time = PM25_data[cols]
 PM25_relative_time = PM25_relative_time.sort_values(by=['station_id', 'utc_time'])
-PM25_relative_time.to_csv('../feature/london/train/PM25/relative_time.csv', index=False)
+PM25_relative_time.to_csv('../feature/london/train/PM2.5/datetime_features.csv', index=False)
 print('Current latest date in PM2.5 training data: {}'.format(PM25_relative_time['utc_time'].max()))
 print('London PM2.5 relative time data: Done!')
 
-# =================================
-# Process London PM10 relative time
-# =================================
+# ======================================
+# Generate London PM10 datetime features
+# ======================================
 PM10_hist_data = pd.read_csv('../input/london/london_PM10_hist_data_w_label.csv')
 PM10_live_data = pd.read_csv('../input/london/london_PM10_live_data_w_label.csv')
 PM10_data = pd.concat([PM10_hist_data, PM10_live_data])
@@ -104,7 +96,7 @@ cols = ['station_id', 'utc_time', 'PM10_label', 'month_of_year',
 PM10_relative_time = PM10_data[cols]
 PM10_relative_time = PM10_relative_time.sort_values(by=['station_id', 'utc_time'])
 
-PM10_relative_time.to_csv('../feature/london/train/PM10/relative_time.csv', index=False)
+PM10_relative_time.to_csv('../feature/london/train/PM10/datetime_features.csv', index=False)
 print('Current latest date in PM10 training data: {}'.format(PM10_relative_time['utc_time'].max()))
 print('London PM10 relative time data: Done!')
 print('Training Data Process: Done!')
@@ -122,15 +114,13 @@ else:
     submission_day2 = today + timedelta(days=2)
 
 # Initialize station ID and utc time columns
-# Note: This can be refactored
-test = pd.DataFrame()
-test_utc_time = [datetime.strptime('{0} {1}:00:00'.format(submission_day1, i), '%Y-%m-%d %H:%M:%S') for i in range(0, 24)] + \
-[datetime.strptime('{0} {1}:00:00'.format(submission_day2, i), '%Y-%m-%d %H:%M:%S') for i in range(0, 24)]
-test['utc_time'] = test_utc_time * PM25_data.station_id.nunique()
-test['station_id'] = list(itertools.chain.from_iterable(
-    [[s_id] * len(test_utc_time) for s_id in PM25_data.station_id.unique().tolist()]))
+testStartTime = datetime(year=submission_day1.year, month=submission_day1.month, day=submission_day1.day)
+testTime = [testStartTime+timedelta(hours=delta) for delta in range(48)]
+stationId = PM25_data.station_id.unique()
+testPair = [(sid, time) for sid in stationId for time in testTime]
+test = pd.DataFrame(testPair, columns=['station_id', 'utc_time'])
 
-# Initialize input date features
+# Generate testing datetime features
 test['month_of_year'] = test['utc_time'].dt.month
 test['week_of_year'] = test['utc_time'].dt.week
 test['week_of_month'] = test['utc_time'].apply(week_of_month)
@@ -138,5 +128,6 @@ test['day_of_month'] = test['utc_time'].dt.day
 test['day_of_week'] = test['utc_time'].dt.weekday
 test['hour_of_day'] = test['utc_time'].dt.hour
 
-test.to_csv('../feature/london/test/relative_time.csv', index = False)
+test.to_csv('../feature/london/test/PM2.5/datetime_features.csv', index = False)
+test.to_csv('../feature/london/test/PM10/datetime_features.csv', index = False)
 print('Testing Data Process: Done!')
