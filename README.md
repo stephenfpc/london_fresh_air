@@ -21,8 +21,16 @@ Data is all provided on official site. [[link](https://biendata.com/competition/
   - Historical data can be directly downloaded on official website, which includes dates on 2017/01/01-2018/03/30.
   - Live data can retrieved by official API. [[Tutorial](https://biendata.com/forum/view_post_category/9)]
 
-## Data Preprocessing
+## Data Preprocessing: Collect all station, air quality and grid weather data
 **The pipeline is in the data_processing folder**
 1. Data Retrieval: Retrieve live data by API [*retrieve_data.py*]
 2. Data Integration: Merge air quality and grid weather data with station data [*data_integration.py*]
 3. Create Labels: Set the air quality at the next hour as label [*create_label.py*]
+
+## Feature Engineering: Generate features for training and testing dataset
+**The pipeline is in the feature_engineering folder**
+1. Datetime Features: Generate features based the observation time. [*datetime_features.py*]
+                      For example: month of year, week of month, week of year, day of week, day of month, hour of day.
+2. Air Quality Features: Perform statistical functions on air quality data with rolling window technique.
+                         The applied functions are mean, median, std, max, min. [*air_quality_features.py*]
+3. Merge all features: Merge all features with station ID, observation time, air quality data and labels. [merge_all_features.py]
