@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 # -*-coding:utf-8
 """
-For feature engineering, It take approximately __ mins.
+Feature Engineering Pipeline.
 
-Please put the below instruction in the terminal:
-    - python3 run.py Y-M-D1 Y-M-D2
-    i.e. python3 run.py 2018-05-08 2018-05-09
-@author: Ray
+Note: The prediction dates can be passed as parameters into scripts
+
+@author: Stephen
 """
-
 import os
 import time
 import sys
