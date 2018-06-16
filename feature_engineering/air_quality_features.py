@@ -6,8 +6,8 @@ Generate air quality features.
 2. Try different statistic method.
 
 Conclusion:
-    -PM2.5: window_size = 1-3 days, stats = mean, std, median, max, min
-    -PM10: window_size = 1-3 days, stat = mean, std, median, max, min
+    PM2.5: window_size = 1-3 days, stats = mean, std, median, max, min
+    PM10: window_size = 1-3 days, stat = mean, std, median, max, min
 
 @author: Stephen, Ray
 '''
@@ -22,14 +22,14 @@ import sys
 # =====================
 # Read Air Quality data
 # =====================
-# PM2.5
+# PM2.5 air quality data
 PM25_hist_data = pd.read_csv('../input/london/london_PM25_hist_data_w_label.csv')
 PM25_live_data = pd.read_csv('../input/london/london_PM25_live_data_w_label.csv')
 PM25_data = pd.concat([PM25_hist_data, PM25_live_data])
 PM25_data = PM25_data.drop(['latitude', 'longitude', 'PM10', 'NO2'], axis=1)
 del PM25_hist_data, PM25_live_data
 
-# PM10
+# PM10 air quality data
 PM10_hist_data = pd.read_csv('../input/london/london_PM10_hist_data_w_label.csv')
 PM10_live_data = pd.read_csv('../input/london/london_PM10_live_data_w_label.csv')
 PM10_data = pd.concat([PM10_hist_data, PM10_live_data])
@@ -51,7 +51,6 @@ if len(sys.argv) > 1:
     submission_day1 = sys.argv[1]
     submission_day2 = sys.argv[2]
 else:
-    # today = date.today()
     today = datetime.date(PM25_data['utc_time'].max())
     submission_day1 = today + timedelta(days=1)
     submission_day2 = today + timedelta(days=2)
@@ -65,11 +64,12 @@ df = pd.DataFrame(testPair, columns=['station_id', 'utc_time'])
 PM25_data = pd.concat([PM25_data, df], axis=0)[['station_id', 'utc_time', 'PM2.5', 'PM2.5_label']]
 PM10_data = pd.concat([PM10_data, df], axis=0)[['station_id', 'utc_time', 'PM10', 'PM10_label']]
 
-# =======================================
-# Process Air Quality statistics features
-# =======================================
+# ========================================
+# Generate Air Quality statistics features
+# ========================================
 # Given a station and utc_time, generate air quality stats with rolling windows.
-# 
+# There are 15 features generated in total, combinations from window size: 1-3 days and stats: mean, std, median, max, min.
+
 d = {'PM2.5': PM25_data, 'PM10': PM10_data}
 for air_quality in ['PM2.5', 'PM10']:
     print('Generate {} Features...'.format(air_quality))
